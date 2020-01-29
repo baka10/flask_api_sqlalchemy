@@ -1,0 +1,25 @@
+version: "1"
+services:
+    dev:
+        build: .
+        volumes:
+            - .:/app
+        ports:
+            - "8100:8000"
+        working_dir: "/app"
+        environment:
+            - FLASK_ENV=development
+            - FLASK_DEBUG=1
+        command: "python ./manage.py runserver 0.0.0.0:8000"
+        links:
+            - redis:redis
+        depends_on:
+            - db
+        external_links:
+            - my_sql:db
+        network_mode: bridge
+    db:
+        image: mysql
+        ports:
+            - '3306'
+        network_mode: bridge
