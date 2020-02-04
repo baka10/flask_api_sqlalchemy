@@ -22,7 +22,7 @@ class Config:
     SQLALCHEMY_POOL_RECYCLE = 1800
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
 
-    CELERY_BROKER_URL = "redis://localhost:6379/0"
+    CELERY_BROKER_URL = "redis://redis:6379/0"
     CELERY_RESULT_BACKEND = CELERY_BROKER_URL
     CELERY_DEFAULT_QUEUE = "semantive"
     CELERY_QUEUES = {
@@ -35,9 +35,10 @@ class Config:
     CELERY_IMPORTS = [
         "semantive.apps.scraper.tasks"
     ]
-    CELERY_BEAT_SCHEDULE = {
-    }
+    CELERY_IGNORE_RESULT = False
     CELERY_TIMEZONE = "Europe/Warsaw"
+    USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'
+    PICTURE_FOLDER = join(ROOT_DIR, "pictures")
 
 
 class ProdConfig(Config):

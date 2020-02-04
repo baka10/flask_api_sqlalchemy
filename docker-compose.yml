@@ -1,6 +1,6 @@
-version: "1"
+version: "3"
 services:
-    dev:
+    api: &python
         build: .
         volumes:
             - .:/app
@@ -10,16 +10,39 @@ services:
         environment:
             - FLASK_ENV=development
             - FLASK_DEBUG=1
-        command: "python ./manage.py runserver 0.0.0.0:8000"
+        command: "python ./manage.py server --host=0.0.0.0 --port=8000"
         links:
-            - redis:redis
-        depends_on:
             - db
-        external_links:
-            - my_sql:db
-        network_mode: bridge
+            - redis
     db:
-        image: mysql
+        image: mysql:8
+        command: ['mysqld', '--default-authentication-plugin=mysql_native_password', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+        restart: always
         ports:
-            - '3306'
+            - "3306:3306"
+        volumes:
+            - ./docker/mysql/init:/docker-entrypoint-initdb.d/
+        environment:
+            MYSQL_ROOT_PASSWORD: root
         network_mode: bridge
+    pma:
+        image: phpmyadmin/phpmyadmin
+        links:
+            - db:db
+        ports:
+            - "8081:80"
+    redis:
+        image: redis
+        ports:
+            - '6379'
+        network_mode: bridge
+    celery:
+        <<: *python
+        working_dir: "/app"
+        ports: []
+        command: celery worker -A semantive.app_celery --loglevel=info
+        restart: on-failure
+        network_mode: bridge
+        links:
+            - redis
+            - db
